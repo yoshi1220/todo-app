@@ -32,6 +32,7 @@ export default class App extends React.Component {
       },
       selectedGroup: "inbox",
       todoCount: 4,
+      groupCount: 1,
     }
   }
 
@@ -77,17 +78,69 @@ export default class App extends React.Component {
     this.setState({selectedGroup: id})
   }
 
+  onAddGroup(groupName) {
+    let _state = Object.assign({}, this.state);
+    _state.groupCount++;
+    let groupId = "group-" + _state.groupCount
+    let groupItem = {
+      id: groupId,
+      label: groupName
+    }
+    _state.groupList.push(groupItem);
+    _state.todoList[groupId] = [];
+
+    this.setState(_state);
+  }
+
+  onEditGroup(id, groupName) {
+    let _state = Object.assign({}, this.state);
+    
+    for (let i = 0; i < this.state.groupList.length; i++) {
+      if (this.state.groupList[i].id == id) {
+        this.state.groupList[i].label = groupName;
+        break;
+      }
+    }
+
+    this.setState(_state);
+  }
+
+  onDeleteGroup(id) {
+    let _state = Object.assign({}, this.state);
+    
+    for (let i = 0; i < this.state.groupList.length; i++) {
+      if (this.state.groupList[i].id == id) {
+        this.state.groupList.splice(i, 1)
+        break;
+      }
+    }
+    delete this.state.todoList[id];
+    this.setState(_state);
+  }
+
   render() {
+    let groupName = "";
+    for (let i = 0; i < this.state.groupList.length; i++) {
+      if (this.state.groupList[i].id == this.state.selectedGroup) {
+        groupName = this.state.groupList[i].label;
+        break;
+      }
+    }
+
     return (
       <div className = "wrap">
         <SideArea
           groupList={this.state.groupList}
-          onSelect={this.onSelectGroup.bind(this)}/>
+          onSelect={this.onSelectGroup.bind(this)}
+          onAddGroup={this.onAddGroup.bind(this)}
+          onEditGroup={this.onEditGroup.bind(this)}
+          onDeleteGroup={this.onDeleteGroup.bind(this)}/>
         <MainArea
           todoList={this.state.todoList[this.state.selectedGroup]}
           onAddTodo={this.onAddTodo.bind(this)}
           onCompleteTodo={this.onCompleteTodo.bind(this)}
           onDeleteTodo={this.onDeleteTodo.bind(this)}
+          groupName={groupName}
         />
       </div>
     );
